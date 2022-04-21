@@ -21,6 +21,7 @@ export default Env.rules({
   PG_USER: Env.schema.string(),
   PG_PASSWORD: Env.schema.string.optional(),
   PG_DB_NAME: Env.schema.string(),
+  PG_SCHEMA: Env.schema.string(),
 	HOST: Env.schema.string({ format: 'host' }),
 	PORT: Env.schema.number(),
 	APP_KEY: Env.schema.string(),

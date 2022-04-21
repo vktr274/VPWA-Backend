@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
-enum Status {
+export enum Status {
   dnd = 'dnd',
   online = 'online',
   offline = 'offline'
@@ -21,6 +21,9 @@ export default class User extends BaseModel {
   public surname: string
 
   @column()
+  public email: string
+
+  @column({ serializeAs: null })
   public password: string
 
   @column()

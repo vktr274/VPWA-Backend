@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 
-enum ChannelType {
+export enum ChannelType {
   private = 'private',
   public = 'public'
 }
