@@ -2,8 +2,11 @@ import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Channel from './Channel'
 import User from './User'
+import Env from '@ioc:Adonis/Core/Env'
 
 export default class KickedChannelUser extends BaseModel {
+  public static table = Env.get('PG_SCHEMA') + '.kicked_channel_users'
+
   @column({ isPrimary: true })
   public id: number
 

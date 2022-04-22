@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import Env from '@ioc:Adonis/Core/Env'
 
 export enum Status {
   dnd = 'dnd',
@@ -8,6 +9,8 @@ export enum Status {
 }
 
 export default class User extends BaseModel {
+  public static table = Env.get('PG_SCHEMA') + '.users'
+
   @column({ isPrimary: true })
   public id: number
 

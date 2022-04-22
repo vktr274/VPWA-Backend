@@ -3,8 +3,16 @@ import User from 'App/Models/User'
 
 export default class UsersController {
   public async register(ctx: HttpContextContract) {
-    return {
-      test: ctx.request.body()
-    }
+    const user = await User.create({
+      username: ctx.request.input("username"),
+      name: ctx.request.input("name"),
+      surname: ctx.request.input("surname"),
+      email: ctx.request.input("email"),
+      password: ctx.request.input("password")
+    })
+    const token = await ctx.auth.use("api").login(
+      user, { expiresIn: "10 days" }
+    )
+    return token.toJSON()
   }
 }
