@@ -18,11 +18,11 @@ export default class Channels extends BaseSchema {
       this.schemaName
     ).createTable(this.usersTableName, (table) => {
       table.increments('id').primary()
-      table.string('username').unique().notNullable()
-      table.string('name').notNullable()
-      table.string('surname').notNullable()
-      table.string('email').unique().notNullable()
-      table.string('password').notNullable()
+      table.string('username', 64).unique().notNullable()
+      table.string('name', 64).notNullable()
+      table.string('surname', 64).notNullable()
+      table.string('email', 64).unique().notNullable()
+      table.string('password', 64).notNullable()
       table
         .enum('status', Object.values(Status))
         .defaultTo(Status.online)
@@ -39,7 +39,7 @@ export default class Channels extends BaseSchema {
       this.schemaName
     ).createTable(this.channelsTableName, (table) => {
       table.increments('id').primary()
-      table.string('name').unique().notNullable()
+      table.string('name', 64).unique().notNullable()
       table
         .enum('type', Object.values(ChannelType))
         .defaultTo(ChannelType.public)
@@ -99,7 +99,7 @@ export default class Channels extends BaseSchema {
         .defaultTo(Role.regular)
         .notNullable()
       table
-        .integer('kick_count')
+        .integer('kick_count').checkBetween([0, 3])
         .unsigned()
         .defaultTo(0)
         .notNullable()
