@@ -29,4 +29,11 @@ export default class UsersController {
     )
     return token.toJSON()
   }
+
+  public async logout(ctx: HttpContextContract) {
+    await ctx.auth.use('api').revoke()
+    return {
+      revoked: true
+    }
+  }
 }
