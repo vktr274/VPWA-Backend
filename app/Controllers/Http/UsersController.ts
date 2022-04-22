@@ -11,7 +11,21 @@ export default class UsersController {
       password: ctx.request.input("password")
     })
     const token = await ctx.auth.use("api").login(
-      user, { expiresIn: "10 days" }
+      user,
+      {
+        expiresIn: "10 days"
+      }
+    )
+    return token.toJSON()
+  }
+
+  public async login(ctx: HttpContextContract) {
+    const token = await ctx.auth.use("api").attempt(
+      ctx.request.input("username"),
+      ctx.request.input("password"),
+      {
+        expiresIn: "10 days"
+      }
     )
     return token.toJSON()
   }

@@ -22,7 +22,7 @@ export default class Channels extends BaseSchema {
       table.string('name', 64).notNullable()
       table.string('surname', 64).notNullable()
       table.string('email', 64).unique().notNullable()
-      table.string('password', 64).notNullable()
+      table.string('password').notNullable()
       table
         .enum('status', Object.values(Status))
         .defaultTo(Status.online)

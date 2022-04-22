@@ -25,4 +25,5 @@ Route.group(() => {
     return { hello: 'world' }
   })
   Route.post("users", "UsersController.register")
+  Route.post("login", "UsersController.login")
 })
