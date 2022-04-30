@@ -1,7 +1,7 @@
 import { Server } from 'socket.io'
 import AdonisServer from '@ioc:Adonis/Core/Server'
 
-export default class Ws {
+class Ws {
   public io: Server
   private booted = false
 
@@ -12,6 +12,7 @@ export default class Ws {
 
     this.booted = true
     this.io = new Server(AdonisServer.instance!)
-    console.log("ws up")
   }
 }
+
+export default new Ws()

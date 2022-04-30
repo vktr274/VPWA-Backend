@@ -1,9 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
-import Ws from 'App/Services/Ws'
-import WsController from '../ws/WsController'
-
-var ws = new Ws()
 
 export default class UsersController {
   public async register(ctx: HttpContextContract) {
@@ -20,7 +16,6 @@ export default class UsersController {
         expiresIn: "10 days"
       }
     )
-    WsController.wsInit(ws)
     return token.toJSON()
   }
 
@@ -32,7 +27,6 @@ export default class UsersController {
         expiresIn: "10 days"
       }
     )
-    WsController.wsInit(ws)
     return token.toJSON()
   }
 
@@ -43,5 +37,3 @@ export default class UsersController {
     }
   }
 }
-
-export { ws }
