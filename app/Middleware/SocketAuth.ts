@@ -3,6 +3,11 @@ import User from 'App/Models/User'
 import crypto from 'crypto'
 import { Socket } from 'socket.io'
 
+interface Token {
+  id: string,
+  token: string
+}
+
 // https://github.com/adonisjs/core/discussions/2051?sort=new#discussioncomment-274111
 
 class SocketAuth {
@@ -34,21 +39,28 @@ class SocketAuth {
   }
 
   async checkToken(token: string) {
-    const parsedToken = this.parseToken(token)
+    var parsedToken: Token | undefined = undefined
+
+    try {
+      parsedToken = this.parseToken(token)
+    } catch (error) {
+      throw new Error('CANNOT_PARSE_TOKEN');
+    }
 
     // TODO: delete later
     console.log(parsedToken)
 
-    const apiToken = await ApiToken.query()
-      .select('user_id')
-      .where('id', parsedToken.id)
-      .andWhere('token', parsedToken.token)
-      .first()
+    try {
+      const apiToken = await ApiToken.query()
+        .select('user_id')
+        .where('id', parsedToken.id)
+        .andWhere('token', parsedToken.token)
+        .first()
 
-    if (apiToken == null) {
-      throw new Error('E_INVALID_API_TOKEN');
+      return apiToken?.user as User;
+    } catch (error) {
+      throw new Error('E_INVALID_API_TOKEN')
     }
-    return apiToken.user as User;
   }
 
   async authenticate(socket: Socket) {
