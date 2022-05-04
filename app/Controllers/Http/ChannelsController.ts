@@ -32,7 +32,7 @@ export default class ChannelsController {
 			response.push({
 				channelName: ch.name,
 				isPrivate: ch.type == ChannelType.private,
-				owner: owner,
+				owner: owner!.username,
 				users: users,
 				messages: [],
 			})
