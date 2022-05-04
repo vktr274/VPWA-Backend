@@ -16,7 +16,14 @@ export default class UsersController {
         expiresIn: "10 days"
       }
     )
-    return token.toJSON()
+    //return data
+    return {
+      token: token.toJSON(),
+      user: {
+        username: user?.username,
+        email: user?.email,
+      }
+    }
   }
 
   public async login(ctx: HttpContextContract) {
@@ -27,7 +34,14 @@ export default class UsersController {
         expiresIn: "10 days"
       }
     )
-    return token.toJSON()
+    //return data
+    return {
+      token: token.toJSON(),
+      user: {
+        username: ctx.auth.user?.name,
+        email: ctx.auth.user?.email,
+      }
+    }
   }
 
   public async logout(ctx: HttpContextContract) {
