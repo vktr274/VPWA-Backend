@@ -33,6 +33,7 @@ Route.group(() => {
   //channels
   Route.get("channels", "ChannelsController.get");
   Route.post("channel", "ChannelsController.create");
+  Route.delete("channel", "ChannelsController.delete");
 
   //messages
   Route.post("messages", "MessagesController.addMessage")

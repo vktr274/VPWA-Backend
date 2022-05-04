@@ -71,4 +71,32 @@ export default class ChannelsController {
 			}
 		};
 	}
+
+	public async delete(ctx: HttpContextContract) {
+		await ctx.auth.use('api').authenticate();
+
+		const user = ctx.auth.user!;
+		if (user === undefined) {
+			//TODO
+			return { errors: "jop" };
+		}
+
+		const name = ctx.request.input("channelName");
+		const channel = await Channel.findBy("name", name);
+		const id = channel!.id;
+
+		//test if user is owner
+		const channelOwner = await Database.from('vpwa_schema.channels_users').where('channel_id', id).where('role', Role.owner);
+		const owner = await User.find(channelOwner[0].user_id);
+
+		if (user.id != owner!.id) {
+			return { errors: `${id} NOT deleted` }
+		} else {
+			//delete
+			channel!.delete();
+			return {
+				channel: `${id} deleted`,
+			};
+		}
+	}
 }
