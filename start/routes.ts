@@ -24,8 +24,16 @@ Route.group(() => {
   Route.get("", async () => {
     return { hello: 'world' }
   })
+
+  //users
   Route.post("users", "UsersController.register")
   Route.post("login", "UsersController.login")
   Route.post("logout", "UsersController.logout")
+
+  //channels
+  Route.get("channels", "ChannelsController.get");
+  Route.post("channel", "ChannelsController.create");
+
+  //messages
   Route.post("messages", "MessagesController.addMessage")
 })
