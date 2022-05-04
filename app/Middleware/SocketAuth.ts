@@ -55,6 +55,7 @@ class SocketAuth {
         .select('user_id')
         .where('id', parsedToken.id)
         .andWhere('token', parsedToken.token)
+        .preload('user')
         .first()
 
       return apiToken?.user as User;

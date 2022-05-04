@@ -6,7 +6,10 @@ export default class ApiToken extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @belongsTo(() => User, { foreignKey: "user_id" })
+  @column()
+  public userId: number
+
+  @belongsTo(() => User, { foreignKey: "userId" })
   public user: BelongsTo<typeof User>
 
   @column()
