@@ -12,7 +12,7 @@ export default class ChannelsController {
 		const user = ctx.auth.user!;
 		if (user === undefined) {
 			//TODO
-			return {};
+			return { error: "jop" };
 		}
 
 		//get channels
@@ -47,7 +47,7 @@ export default class ChannelsController {
 		const user = ctx.auth.user!;
 		if (user === undefined) {
 			//TODO
-			return {};
+			return { errors: "jop" };
 		}
 
 		const channel = new Channel();
@@ -61,7 +61,14 @@ export default class ChannelsController {
 		channelUser.role = Role.owner;
 		await channelUser.save();
 
-
-		return { channel: channel };
+		return {
+			channel: {
+				channelName: channel.name,
+				isPrivate: channel.type == ChannelType.private,
+				owner: user.username,
+				users: [user],
+				messages: [],
+			}
+		};
 	}
 }
