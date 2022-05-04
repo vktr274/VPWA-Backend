@@ -36,14 +36,16 @@ class SocketAuth {
   async checkToken(token: string) {
     const parsedToken = this.parseToken(token)
 
+    // TODO: delete later
+    console.log(parsedToken)
+
     const apiToken = await ApiToken.query()
       .select('user_id')
       .where('id', parsedToken.id)
       .andWhere('token', parsedToken.token)
-      .preload('user')
       .first()
 
-    if (!apiToken) {
+    if (apiToken == null) {
       throw new Error('E_INVALID_API_TOKEN');
     }
     return apiToken.user as User;
