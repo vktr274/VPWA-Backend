@@ -3,6 +3,7 @@ import Channel, { ChannelType } from 'App/Models/Channel';
 import ChannelUser, { Role } from 'App/Models/ChannelUser';
 import Database from '@ioc:Adonis/Lucid/Database';
 import User from 'App/Models/User';
+import Message from 'App/Models/Message';
 
 export default class ChannelsController {
 
@@ -15,26 +16,24 @@ export default class ChannelsController {
 			return { error: "jop" };
 		}
 
-		//get channels
-		const channels = await Channel.all();
+		//get channels user is in
+		const usersChannels = await ChannelUser.query().where("user_id", user.id);
+		const channelIds = usersChannels.map((ch) => ch.channel_id);
+
+		const channels = await Channel.findMany(channelIds);
 		const json = channels.map((ch) => ch.serialize());
 
 		//prepare output
 		let response = [] as any;
 		for (const ch of json) {
-			//get users and owner
-			const channelUsers = await Database.from('vpwa_schema.channels_users').where('channel_id', ch.id);
-			const channelOwner = await Database.from('vpwa_schema.channels_users').where('channel_id', ch.id).where('role', Role.owner);
-
-			const users = await User.findMany(channelUsers.map((user) => user.user_id));
-			const owner = await User.find(channelOwner[0].user_id);
+			//get owner
+			const owner = await this.getChannelOwner(ch.id);
 
 			response.push({
 				channelName: ch.name,
 				isPrivate: ch.type == ChannelType.private,
 				owner: owner!.username,
-				users: users,
-				messages: [],
+				messages: await this.getChannelMessages(ch.id),
 			})
 		};
 
@@ -50,24 +49,36 @@ export default class ChannelsController {
 			return { errors: "jop" };
 		}
 
-		const channel = new Channel();
-		channel.name = ctx.request.input("channelName");
-		channel.type = ctx.request.input("isPrivate") ? ChannelType.private : ChannelType.public;
-		await channel.save();
+		//create new if not in db
+		const name = ctx.request.input("channelName");
+		let channel = await Channel.findBy("name", name);
+		let channelCreated = false;
 
-		const channelUser = new ChannelUser();
-		channelUser.user_id = user.id;
-		channelUser.channel_id = channel.id;
-		channelUser.role = Role.owner;
-		await channelUser.save();
+		if (channel == null) {
+			channel = new Channel();
+			channel.name = name;
+			channel.type = ctx.request.input("isPrivate") ? ChannelType.private : ChannelType.public;
+			await channel.save();
+			channelCreated = true;
+		}
+
+		//add user if not in channel
+		let channelUser = await ChannelUser.query().where("channel_id", channel.id).where("user_id", user.id).first();
+
+		if (channelUser == null) {
+			channelUser = new ChannelUser();
+			channelUser.user_id = user.id;
+			channelUser.channel_id = channel.id;
+			channelUser.role = channelCreated ? Role.owner : Role.regular;
+			await channelUser.save();
+		}
 
 		return {
 			channel: {
 				channelName: channel.name,
 				isPrivate: channel.type == ChannelType.private,
-				owner: user.username,
-				users: [user],
-				messages: [],
+				owner: (await this.getChannelOwner(channel.id))!.username,
+				messages: await this.getChannelMessages(channel.id),
 			}
 		};
 	}
@@ -98,5 +109,28 @@ export default class ChannelsController {
 				channel: `${id} deleted`,
 			};
 		}
+	}
+
+	private async getChannelOwner(id: number) {
+		const channelOwner = await ChannelUser.query().where('channel_id', id).where('role', Role.owner).first();
+		return User.find(channelOwner!.user_id);
+	}
+
+	private async getChannelMessages(id: number) {
+		const messages = await Message.query().where("channel_id", id); //TODO pagination
+		const json = messages.map((m) => m.serialize());
+
+		//prepare output
+		let response = [] as any;
+		for (const m of json) {
+			const author = await User.find(m.user_id);
+
+			response.push({
+				author: author!.username,
+				time: m.sent_at,
+				text: m.text,
+			})
+		};
+		return response;
 	}
 }
