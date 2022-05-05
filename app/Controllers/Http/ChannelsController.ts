@@ -16,8 +16,11 @@ export default class ChannelsController {
 			return { error: "jop" };
 		}
 
-		//get channels
-		const channels = await Channel.all();
+		//get channels user is in
+		const usersChannels = await ChannelUser.query().where("user_id", user.id);
+		const channelIds = usersChannels.map((ch) => ch.channel_id);
+
+		const channels = await Channel.findMany(channelIds);
 		const json = channels.map((ch) => ch.serialize());
 
 		//prepare output
