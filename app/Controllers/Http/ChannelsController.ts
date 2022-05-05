@@ -2,7 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Channel, { ChannelType } from 'App/Models/Channel';
 import ChannelUser, { Role } from 'App/Models/ChannelUser';
 import User from 'App/Models/User';
-import Message from 'App/Models/Message';
+import MessagesController from './MessagesController';
 
 export default class ChannelsController {
 
@@ -31,7 +31,7 @@ export default class ChannelsController {
 				channelName: ch.name,
 				isPrivate: ch.type == ChannelType.private,
 				owner: owner!.username,
-				messages: await this.getChannelMessages(ch.id),
+				messages: await MessagesController.getChannelMessages(ch.id),
 			})
 		};
 
@@ -80,7 +80,7 @@ export default class ChannelsController {
 				channelName: channel.name,
 				isPrivate: channel.type == ChannelType.private,
 				owner: (await this.getChannelOwner(channel.id))!.username,
-				messages: await this.getChannelMessages(channel.id),
+				messages: await MessagesController.getChannelMessages(channel.id),
 			}
 		};
 	}
@@ -120,23 +120,5 @@ export default class ChannelsController {
 	private async getChannelOwner(id: number) {
 		const channelOwner = await ChannelUser.query().where('channel_id', id).where('role', Role.owner).first();
 		return User.find(channelOwner!.userId);
-	}
-
-	private async getChannelMessages(id: number) {
-		const messages = await Message.query().where("channel_id", id); //TODO pagination
-		const json = messages.map((m) => m.serialize());
-
-		//prepare output
-		let response = [] as any;
-		for (const m of json) {
-			const author = await User.find(m.user_id);
-
-			response.push({
-				author: author!.username,
-				time: m.sent_at,
-				text: m.text,
-			})
-		};
-		return response;
 	}
 }
