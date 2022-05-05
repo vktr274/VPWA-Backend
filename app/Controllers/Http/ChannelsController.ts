@@ -3,6 +3,7 @@ import Channel, { ChannelType } from 'App/Models/Channel';
 import ChannelUser, { Role } from 'App/Models/ChannelUser';
 import Database from '@ioc:Adonis/Lucid/Database';
 import User from 'App/Models/User';
+import Message from 'App/Models/Message';
 
 export default class ChannelsController {
 
@@ -22,19 +23,14 @@ export default class ChannelsController {
 		//prepare output
 		let response = [] as any;
 		for (const ch of json) {
-			//get users and owner
-			const channelUsers = await Database.from('vpwa_schema.channels_users').where('channel_id', ch.id);
-			const channelOwner = await Database.from('vpwa_schema.channels_users').where('channel_id', ch.id).where('role', Role.owner);
-
-			const users = await User.findMany(channelUsers.map((user) => user.user_id));
-			const owner = await User.find(channelOwner[0].user_id);
+			//get owner
+			const owner = await this.getChannelOwner(ch.id);
 
 			response.push({
 				channelName: ch.name,
 				isPrivate: ch.type == ChannelType.private,
 				owner: owner!.username,
-				users: users,
-				messages: [],
+				messages: await this.getChannelMessages(ch.id),
 			})
 		};
 
@@ -78,9 +74,8 @@ export default class ChannelsController {
 			channel: {
 				channelName: channel.name,
 				isPrivate: channel.type == ChannelType.private,
-				owner: user.username,
-				users: [user], // TODO
-				messages: [],
+				owner: (await this.getChannelOwner(channel.id))!.username,
+				messages: await this.getChannelMessages(channel.id),
 			}
 		};
 	}
@@ -111,5 +106,28 @@ export default class ChannelsController {
 				channel: `${id} deleted`,
 			};
 		}
+	}
+
+	private async getChannelOwner(id: number) {
+		const channelOwner = await ChannelUser.query().where('channel_id', id).where('role', Role.owner).first();
+		return User.find(channelOwner!.user_id);
+	}
+
+	private async getChannelMessages(id: number) {
+		const messages = await Message.query().where("channel_id", id); //TODO pagination
+		const json = messages.map((m) => m.serialize());
+
+		//prepare output
+		let response = [] as any;
+		for (const m of json) {
+			const author = await User.find(m.user_id);
+
+			response.push({
+				author: author!.name,
+				time: m.sent_at,
+				text: m.text,
+			})
+		};
+		return response;
 	}
 }
