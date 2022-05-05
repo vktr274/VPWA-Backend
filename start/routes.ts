@@ -26,9 +26,10 @@ Route.group(() => {
   })
 
   //users
-  Route.post("users", "UsersController.register")
+  Route.post("register", "UsersController.register")
   Route.post("login", "UsersController.login")
-  Route.post("logout", "UsersController.logout")
+
+  Route.get("users", "UsersController.get")
 
   //channels
   Route.get("channels", "ChannelsController.get");
