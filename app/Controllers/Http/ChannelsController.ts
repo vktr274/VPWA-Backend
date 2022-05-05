@@ -126,7 +126,7 @@ export default class ChannelsController {
 			const author = await User.find(m.user_id);
 
 			response.push({
-				author: author!.name,
+				author: author!.username,
 				time: m.sent_at,
 				text: m.text,
 			})

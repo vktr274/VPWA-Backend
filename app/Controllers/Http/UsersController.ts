@@ -38,7 +38,7 @@ export default class UsersController {
     return {
       token: token.toJSON(),
       user: {
-        username: ctx.auth.user?.name,
+        username: ctx.auth.user?.username,
         email: ctx.auth.user?.email,
       }
     }
