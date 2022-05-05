@@ -16,7 +16,7 @@ export default class ChannelsController {
 
 		//get channels user is in
 		const usersChannels = await ChannelUser.query().where("user_id", user.id);
-		const channelIds = usersChannels.map((ch) => ch.channel_id);
+		const channelIds = usersChannels.map((ch) => ch.channelId);
 
 		const channels = await Channel.findMany(channelIds);
 		const json = channels.map((ch) => ch.serialize());
@@ -69,8 +69,8 @@ export default class ChannelsController {
 			}
 
 			channelUser = new ChannelUser();
-			channelUser.user_id = user.id;
-			channelUser.channel_id = channel.id;
+			channelUser.userId = user.id;
+			channelUser.channelId = channel.id;
 			channelUser.role = channelCreated ? Role.owner : Role.regular;
 			await channelUser.save();
 		}
@@ -119,7 +119,7 @@ export default class ChannelsController {
 
 	private async getChannelOwner(id: number) {
 		const channelOwner = await ChannelUser.query().where('channel_id', id).where('role', Role.owner).first();
-		return User.find(channelOwner!.user_id);
+		return User.find(channelOwner!.userId);
 	}
 
 	private async getChannelMessages(id: number) {
