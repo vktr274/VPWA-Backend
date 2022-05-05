@@ -30,11 +30,11 @@ Ws.io.on('connection', (socket) => {
         messageData.userName
       )
       const message = await Message.create({
-        text: messageData.text
+        text: messageData.text,
+        userId: user.id,
+        channelId: channel.id
       })
-      await message.related("user").associate(user)
-      await message.related("channel").associate(channel)
-      console.log(messageData)
+      console.log(message.serialize())
     } catch (error) {
       console.log(messageData)
       console.log(error.message)
