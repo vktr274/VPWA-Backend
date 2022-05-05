@@ -27,7 +27,8 @@ Route.group(() => {
         {
           GET: [
             "/users",
-            "/channels",],
+            "/channels",
+            "/messages"],
         }, {
           POST: [
             "/register",
@@ -35,7 +36,7 @@ Route.group(() => {
             "/channel"],
         }, {
           DELETE: [
-            "channel",],
+            "/channel",],
         }]
     }
   })
@@ -52,5 +53,5 @@ Route.group(() => {
   Route.delete("channel", "ChannelsController.delete").middleware('auth');
 
   //messages
-  //TODO
+  Route.get("messages", "MessagesController.get",).middleware('auth');
 })
