@@ -1,6 +1,8 @@
 import SocketAuth from 'App/Middleware/SocketAuth'
 import Channel from 'App/Models/Channel'
+import ChannelUser from 'App/Models/ChannelUser'
 import Message from 'App/Models/Message'
+import User from 'App/Models/User'
 import Ws from 'App/Services/Ws'
 
 Ws.boot()
@@ -14,9 +16,20 @@ interface MessageData {
 }
 
 interface InviteData {
+  token: string,
   fromUser: string,
   toUser: string,
   channel: string
+}
+
+export enum Role {
+  owner = 'owner',
+  regular = 'regular'
+}
+
+export enum ChannelType {
+  private = 'private',
+  public = 'public'
 }
 
 /**
@@ -47,7 +60,42 @@ Ws.io.on('connection', (socket) => {
   })
 
   socket.on('invite', async (data) => {
+    const inviteData = data as InviteData
+    try {
+      const fromUser = await SocketAuth.authenticate(inviteData.token)
+      const toUser = await User.findByOrFail(
+        'username',
+        inviteData.toUser
+      )
 
+      const channel = await Channel.findByOrFail(
+        "name",
+        inviteData.channel
+      )
+
+      const channelUser = await ChannelUser.query()
+        .select('role').where('user_id', fromUser.id)
+        .andWhere('channel_id', channel.id)
+        .firstOrFail()
+
+      if (
+        (channel.type == ChannelType.private && channelUser.role == Role.owner) ||
+        (channel.type == ChannelType.public)
+      ) {
+        const invitation = await ChannelUser.create({
+          userId: toUser.id,
+          channelId: channel.id
+        })
+        console.log(invitation.serialize())
+        socket.broadcast.emit('newInvite', inviteData)
+      } else {
+        socket.broadcast.emit('inviteError', { message: 'UNAUTHORIZED', user: fromUser.username })
+      }
+    } catch (error) {
+      console.log(inviteData)
+      console.log(error.message)
+      socket.broadcast.emit('inviteError', { message: error.message, user: inviteData.fromUser })
+    }
   })
 })
 
