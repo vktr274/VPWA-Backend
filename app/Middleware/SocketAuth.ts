@@ -1,7 +1,6 @@
 import ApiToken from 'App/Models/ApiToken'
 import User from 'App/Models/User'
 import crypto from 'crypto'
-import { Socket } from 'socket.io'
 
 interface Token {
   id: string,
@@ -64,14 +63,9 @@ class SocketAuth {
     }
   }
 
-  async authenticate(socket: Socket) {
-    const token = socket.handshake.auth.token
-
-    if (!token || typeof token !== 'string') {
-      throw new Error('MISSING_TOKEN')
-    }
-
+  async authenticate(token: string) {
     try {
+      console.log(token)
       return await this.checkToken(token)
     } catch (error) {
       throw new Error('BAD_CREDENTIALS');

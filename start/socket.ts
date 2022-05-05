@@ -1,14 +1,15 @@
 import SocketAuth from 'App/Middleware/SocketAuth'
 import Channel from 'App/Models/Channel'
 import Message from 'App/Models/Message'
-import User from 'App/Models/User'
 import Ws from 'App/Services/Ws'
 
 Ws.boot()
 
 interface MessageData {
+  token: string,
   userName: string,
   channelName: string,
+  time: string
   text: string
 }
 
@@ -21,19 +22,17 @@ Ws.io.on('connection', (socket) => {
   socket.on('addMessage', async (data) => {
     const messageData = data as MessageData
     try {
+      const user = await SocketAuth.authenticate(messageData.token)
       const channel = await Channel.findByOrFail(
         "name",
         messageData.channelName
       )
-      const user = await User.findByOrFail(
-        "username",
-        messageData.userName
-      )
       const message = await Message.create({
         text: messageData.text,
         userId: user.id,
-        channelId: channel.id
+        channelId: channel.id,
       })
+      socket.broadcast.emit('newMessage', messageData)
       console.log(message.serialize())
     } catch (error) {
       console.log(messageData)
@@ -42,6 +41,7 @@ Ws.io.on('connection', (socket) => {
   })
 })
 
+/*
 Ws.io.use((socket, next) => {
   try {
     SocketAuth.authenticate(socket)
@@ -50,4 +50,4 @@ Ws.io.use((socket, next) => {
     next(new Error("AUTH_ERROR"))
   }
 })
-
+*/
