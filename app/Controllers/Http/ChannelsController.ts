@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Channel, { ChannelType } from 'App/Models/Channel';
 import ChannelUser, { Role } from 'App/Models/ChannelUser';
-import Database from '@ioc:Adonis/Lucid/Database';
 import User from 'App/Models/User';
 import Message from 'App/Models/Message';
 
@@ -97,17 +96,22 @@ export default class ChannelsController {
 		const id = channel!.id;
 
 		//test if user is owner
-		const channelOwner = await Database.from('vpwa_schema.channels_users').where('channel_id', id).where('role', Role.owner);
-		const owner = await User.find(channelOwner[0].user_id);
+		const owner = await this.getChannelOwner(id);
 
-		if (user.id != owner!.id) {
-			return { errors: `${id} NOT deleted` }
-		} else {
+		if (user.id == owner!.id) {
 			//delete
 			channel!.delete();
 			return {
-				channel: `${id} deleted`,
+				channel: `${name} deleted`,
 			};
+		}
+		else {
+			//let user leave channel
+			const userChannel = await ChannelUser.query().where("user_id", user.id).where("channel_id", id).first();
+			userChannel!.delete();
+			return {
+				channel: `${user.username} left channel ${name}`
+			}
 		}
 	}
 
