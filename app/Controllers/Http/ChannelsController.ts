@@ -50,23 +50,36 @@ export default class ChannelsController {
 			return { errors: "jop" };
 		}
 
-		const channel = new Channel();
-		channel.name = ctx.request.input("channelName");
-		channel.type = ctx.request.input("isPrivate") ? ChannelType.private : ChannelType.public;
-		await channel.save();
+		//create new if not in db
+		const name = ctx.request.input("channelName");
+		let channel = await Channel.findBy("name", name);
+		let channelCreated = false;
 
-		const channelUser = new ChannelUser();
-		channelUser.user_id = user.id;
-		channelUser.channel_id = channel.id;
-		channelUser.role = Role.owner;
-		await channelUser.save();
+		if (channel == null) {
+			channel = new Channel();
+			channel.name = name;
+			channel.type = ctx.request.input("isPrivate") ? ChannelType.private : ChannelType.public;
+			await channel.save();
+			channelCreated = true;
+		}
+
+		//add user if not in channel
+		let channelUser = await ChannelUser.query().where("channel_id", channel.id).where("user_id", user.id).first();
+
+		if (channelUser == null) {
+			channelUser = new ChannelUser();
+			channelUser.user_id = user.id;
+			channelUser.channel_id = channel.id;
+			channelUser.role = channelCreated ? Role.owner : Role.regular;
+			await channelUser.save();
+		}
 
 		return {
 			channel: {
 				channelName: channel.name,
 				isPrivate: channel.type == ChannelType.private,
 				owner: user.username,
-				users: [user],
+				users: [user], // TODO
 				messages: [],
 			}
 		};
