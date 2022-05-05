@@ -1,4 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Channel from 'App/Models/Channel'
+import ChannelUser from 'App/Models/ChannelUser'
 import User from 'App/Models/User'
 
 export default class UsersController {
@@ -44,10 +46,30 @@ export default class UsersController {
     }
   }
 
-  public async logout(ctx: HttpContextContract) {
-    await ctx.auth.use('api').revoke()
-    return {
-      revoked: true
+  public async get(ctx: HttpContextContract) {
+    await ctx.auth.use('api').authenticate();
+
+    const user = ctx.auth.user!;
+    if (user === undefined) {
+      return { errors: `Authentication error` };
     }
+
+    //get channel
+    const channelName = ctx.request.qs().channelName;
+    const channel = await Channel.findBy("name", channelName);
+    if (channel == null) {
+      return { errors: `Channel '${channelName}' does not exist` };
+    }
+
+    //get users
+    const channelUsers = await ChannelUser.query().where("channel_id", channel!.id);
+    const users = await User.findMany(channelUsers.map((u) => u.user_id))
+
+    return {
+      users: users.map((u) => ({
+        username: u.username,
+        email: u.email,
+      }))
+    };
   }
 }

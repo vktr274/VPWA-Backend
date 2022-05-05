@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Channel, { ChannelType } from 'App/Models/Channel';
 import ChannelUser, { Role } from 'App/Models/ChannelUser';
-import Database from '@ioc:Adonis/Lucid/Database';
 import User from 'App/Models/User';
 import Message from 'App/Models/Message';
 
@@ -12,8 +11,7 @@ export default class ChannelsController {
 
 		const user = ctx.auth.user!;
 		if (user === undefined) {
-			//TODO
-			return { error: "jop" };
+			return { errors: `Authentication error` };
 		}
 
 		//get channels user is in
@@ -45,8 +43,7 @@ export default class ChannelsController {
 
 		const user = ctx.auth.user!;
 		if (user === undefined) {
-			//TODO
-			return { errors: "jop" };
+			return { errors: `Authentication error` };
 		}
 
 		//create new if not in db
@@ -66,6 +63,11 @@ export default class ChannelsController {
 		let channelUser = await ChannelUser.query().where("channel_id", channel.id).where("user_id", user.id).first();
 
 		if (channelUser == null) {
+			//test if user is atempting to join private channel
+			if (channel.type == ChannelType.private && !channelCreated) {
+				return { errors: `Channel '${channel.name}' is private` };
+			}
+
 			channelUser = new ChannelUser();
 			channelUser.user_id = user.id;
 			channelUser.channel_id = channel.id;
@@ -88,8 +90,7 @@ export default class ChannelsController {
 
 		const user = ctx.auth.user!;
 		if (user === undefined) {
-			//TODO
-			return { errors: "jop" };
+			return { errors: `Authentication error` };
 		}
 
 		const name = ctx.request.input("channelName");
@@ -97,17 +98,22 @@ export default class ChannelsController {
 		const id = channel!.id;
 
 		//test if user is owner
-		const channelOwner = await Database.from('vpwa_schema.channels_users').where('channel_id', id).where('role', Role.owner);
-		const owner = await User.find(channelOwner[0].user_id);
+		const owner = await this.getChannelOwner(id);
 
-		if (user.id != owner!.id) {
-			return { errors: `${id} NOT deleted` }
-		} else {
+		if (user.id == owner!.id) {
 			//delete
 			channel!.delete();
 			return {
-				channel: `${id} deleted`,
+				channel: `${name} deleted`,
 			};
+		}
+		else {
+			//let user leave channel
+			const userChannel = await ChannelUser.query().where("user_id", user.id).where("channel_id", id).first();
+			userChannel!.delete();
+			return {
+				channel: `${user.username} left channel ${name}`
+			}
 		}
 	}
 
