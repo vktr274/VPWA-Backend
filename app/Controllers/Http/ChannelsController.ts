@@ -11,8 +11,7 @@ export default class ChannelsController {
 
 		const user = ctx.auth.user!;
 		if (user === undefined) {
-			//TODO
-			return { error: "jop" };
+			return { errors: `Authentication error` };
 		}
 
 		//get channels user is in
@@ -44,8 +43,7 @@ export default class ChannelsController {
 
 		const user = ctx.auth.user!;
 		if (user === undefined) {
-			//TODO
-			return { errors: "jop" };
+			return { errors: `Authentication error` };
 		}
 
 		//create new if not in db
@@ -65,6 +63,11 @@ export default class ChannelsController {
 		let channelUser = await ChannelUser.query().where("channel_id", channel.id).where("user_id", user.id).first();
 
 		if (channelUser == null) {
+			//test if user is atempting to join private channel
+			if (channel.type == ChannelType.private && !channelCreated) {
+				return { errors: `Channel '${channel.name}' is private` };
+			}
+
 			channelUser = new ChannelUser();
 			channelUser.user_id = user.id;
 			channelUser.channel_id = channel.id;
@@ -87,8 +90,7 @@ export default class ChannelsController {
 
 		const user = ctx.auth.user!;
 		if (user === undefined) {
-			//TODO
-			return { errors: "jop" };
+			return { errors: `Authentication error` };
 		}
 
 		const name = ctx.request.input("channelName");
