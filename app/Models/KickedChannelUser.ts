@@ -10,13 +10,22 @@ export default class KickedChannelUser extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
-  @belongsTo(() => User, { foreignKey: "user_id" })
-  public user: BelongsTo<typeof User>
+  @column()
+  public byUserId: number;
 
-  @belongsTo(() => User, { foreignKey: "by_user_id" })
+  @belongsTo(() => User, { foreignKey: "byUserId" })
   public byUser: BelongsTo<typeof User>
 
-  @belongsTo(() => Channel, { foreignKey: "channel_id" })
+  @column()
+  public userId: number;
+
+  @belongsTo(() => User, { foreignKey: "userId" })
+  public user: BelongsTo<typeof User>
+
+  @column()
+  public channelId: number;
+
+  @belongsTo(() => Channel, { foreignKey: "channelId" })
   public channel: BelongsTo<typeof Channel>
 
   @column.dateTime({ autoCreate: true })

@@ -16,15 +16,15 @@ export default class ChannelUser extends BaseModel {
   public id: number
 
   @column()
-  public user_id: number;
+  public userId: number;
 
-  @belongsTo(() => User, { foreignKey: "user_id" })
+  @belongsTo(() => User, { foreignKey: "userId" })
   public user: BelongsTo<typeof User>
 
   @column()
-  public channel_id: number;
+  public channelId: number;
 
-  @belongsTo(() => Channel, { foreignKey: "channel_id" })
+  @belongsTo(() => Channel, { foreignKey: "channelId" })
   public channel: BelongsTo<typeof Channel>
 
   @column()
