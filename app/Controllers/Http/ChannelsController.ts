@@ -7,15 +7,8 @@ import MessagesController from './MessagesController';
 export default class ChannelsController {
 
 	public async get(ctx: HttpContextContract) {
-		await ctx.auth.use('api').authenticate();
-
-		const user = ctx.auth.user!;
-		if (user === undefined) {
-			return { errors: `Authentication error` };
-		}
-
 		//get channels user is in
-		const usersChannels = await ChannelUser.query().where("user_id", user.id);
+		const usersChannels = await ChannelUser.query().where("user_id", ctx.auth.user!.id);
 		const channelIds = usersChannels.map((ch) => ch.channelId);
 
 		const channels = await Channel.findMany(channelIds);
@@ -39,13 +32,6 @@ export default class ChannelsController {
 	}
 
 	public async create(ctx: HttpContextContract) {
-		await ctx.auth.use('api').authenticate();
-
-		const user = ctx.auth.user!;
-		if (user === undefined) {
-			return { errors: `Authentication error` };
-		}
-
 		//create new if not in db
 		const name = ctx.request.input("channelName");
 		let channel = await Channel.findBy("name", name);
@@ -60,6 +46,7 @@ export default class ChannelsController {
 		}
 
 		//add user if not in channel
+		const user = ctx.auth.user!;
 		let channelUser = await ChannelUser.query().where("channel_id", channel.id).where("user_id", user.id).first();
 
 		if (channelUser == null) {
@@ -86,18 +73,12 @@ export default class ChannelsController {
 	}
 
 	public async delete(ctx: HttpContextContract) {
-		await ctx.auth.use('api').authenticate();
-
-		const user = ctx.auth.user!;
-		if (user === undefined) {
-			return { errors: `Authentication error` };
-		}
-
 		const name = ctx.request.input("channelName");
 		const channel = await Channel.findBy("name", name);
 		const id = channel!.id;
 
 		//test if user is owner
+		const user = ctx.auth.user!;
 		const owner = await this.getChannelOwner(id);
 
 		if (user.id == owner!.id) {

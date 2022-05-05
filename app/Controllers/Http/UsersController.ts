@@ -47,13 +47,6 @@ export default class UsersController {
   }
 
   public async get(ctx: HttpContextContract) {
-    await ctx.auth.use('api').authenticate();
-
-    const user = ctx.auth.user!;
-    if (user === undefined) {
-      return { errors: `Authentication error` };
-    }
-
     //get channel
     const channelName = ctx.request.qs().channelName;
     const channel = await Channel.findBy("name", channelName);

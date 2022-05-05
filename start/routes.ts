@@ -26,16 +26,16 @@ Route.group(() => {
   })
 
   //users
-  Route.post("register", "UsersController.register")
-  Route.post("login", "UsersController.login")
+  Route.post("register", "UsersController.register");
+  Route.post("login", "UsersController.login");
 
-  Route.get("users", "UsersController.get")
+  Route.get("users", "UsersController.get").middleware('auth');
 
   //channels
-  Route.get("channels", "ChannelsController.get");
-  Route.post("channel", "ChannelsController.create");
-  Route.delete("channel", "ChannelsController.delete");
+  Route.get("channels", "ChannelsController.get").middleware('auth');
+  Route.post("channel", "ChannelsController.create").middleware('auth');
+  Route.delete("channel", "ChannelsController.delete").middleware('auth');
 
   //messages
-  Route.post("messages", "MessagesController.addMessage")
+  Route.post("messages", "MessagesController.addMessage").middleware('auth');
 })
