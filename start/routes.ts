@@ -22,7 +22,22 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
   Route.get("", async () => {
-    return { hello: 'world' }
+    return {
+      routes: [
+        {
+          GET: [
+            "/users",
+            "/channels",],
+        }, {
+          POST: [
+            "/register",
+            "/login",
+            "/channel"],
+        }, {
+          DELETE: [
+            "channel",],
+        }]
+    }
   })
 
   //users
@@ -37,5 +52,5 @@ Route.group(() => {
   Route.delete("channel", "ChannelsController.delete").middleware('auth');
 
   //messages
-  Route.post("messages", "MessagesController.addMessage").middleware('auth');
+  //TODO
 })
