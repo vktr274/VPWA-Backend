@@ -63,7 +63,7 @@ export default class UsersController {
 
     //get users
     const channelUsers = await ChannelUser.query().where("channel_id", channel!.id);
-    const users = await User.findMany(channelUsers.map((u) => u.user_id))
+    const users = await User.findMany(channelUsers.map((u) => u.userId))
 
     return {
       users: users.map((u) => ({
