@@ -21,7 +21,4 @@ export default class Channel extends BaseModel {
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true })
-  public lastActivityAt: DateTime
 }

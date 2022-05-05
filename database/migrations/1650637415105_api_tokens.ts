@@ -24,8 +24,4 @@ export default class ApiTokens extends BaseSchema {
       table.timestamp('created_at', { useTz: true }).notNullable()
     })
   }
-
-  public async down() {
-    this.schema.dropTable(this.tableName)
-  }
 }

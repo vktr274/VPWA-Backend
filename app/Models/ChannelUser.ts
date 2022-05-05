@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
 import Channel from './Channel'
@@ -32,10 +31,4 @@ export default class ChannelUser extends BaseModel {
 
   @column()
   public kickCount: number
-
-  @column.dateTime()
-  public joinedAt: DateTime | null
-
-  @column.dateTime({ autoCreate: true })
-  public invitedAt: DateTime
 }

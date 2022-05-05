@@ -141,12 +141,4 @@ export default class Channels extends BaseSchema {
         .notNullable()
     })
   }
-
-  public async down () {
-    this.schema.dropTable(this.channelsTableName)
-    this.schema.dropTable(this.usersTableName)
-    this.schema.dropTable(this.messagesTableName)
-    this.schema.dropTable(this.channelsUsersTableName)
-    this.schema.dropTable(this.kickedChannelUsersTableName)
-  }
 }

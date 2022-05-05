@@ -13,6 +13,12 @@ interface MessageData {
   text: string
 }
 
+interface InviteData {
+  fromUser: string,
+  toUser: string,
+  channel: string
+}
+
 /**
  * Listen for incoming socket connections
  */
@@ -38,6 +44,10 @@ Ws.io.on('connection', (socket) => {
       console.log(messageData)
       console.log(error.message)
     }
+  })
+
+  socket.on('invite', async (data) => {
+
   })
 })
 

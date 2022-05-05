@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Channel from './Channel'
 import User from './User'
@@ -27,7 +26,4 @@ export default class KickedChannelUser extends BaseModel {
 
   @belongsTo(() => Channel, { foreignKey: "channelId" })
   public channel: BelongsTo<typeof Channel>
-
-  @column.dateTime({ autoCreate: true })
-  public kickedAt: DateTime
 }
