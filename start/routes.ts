@@ -44,7 +44,8 @@ Route.group(() => {
   //users
   Route.post("register", "UsersController.register");
   Route.post("login", "UsersController.login");
-
+  Route.post("status", "StatusController.setSatus").middleware('auth');
+  Route.get("status", "StatusController.getSatus").middleware('auth');
   Route.get("users", "UsersController.get").middleware('auth');
 
   //channels
