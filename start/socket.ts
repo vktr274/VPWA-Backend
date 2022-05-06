@@ -1,3 +1,4 @@
+import MessagesController from 'App/Controllers/Http/MessagesController'
 import SocketAuth from 'App/Middleware/SocketAuth'
 import Channel from 'App/Models/Channel'
 import ChannelUser from 'App/Models/ChannelUser'
@@ -22,7 +23,8 @@ interface InviteData {
   channel: {
     name: string,
     isPrivate: boolean,
-    owner: string
+    owner: string,
+    messages: any[],
   }
 }
 
@@ -54,7 +56,7 @@ Ws.io.on('connection', (socket) => {
         text: messageData.text,
         userId: user.id,
         channelId: channel.id,
-      })
+      } as any)
       socket.broadcast.emit('newMessage', messageData)
       console.log(message.serialize())
     } catch (error) {
@@ -91,6 +93,8 @@ Ws.io.on('connection', (socket) => {
           channelId: channel.id
         })
         console.log(invitation.serialize())
+
+        inviteData.channel.messages = await MessagesController.getChannelMessages(channel.id);
         socket.broadcast.emit('newInvite', inviteData)
       } else {
         socket.emit('inviteError', { message: 'UNAUTHORIZED', user: fromUser.username })

@@ -55,9 +55,9 @@ class SocketAuth {
         .where('id', parsedToken.id)
         .andWhere('token', parsedToken.token)
         .preload('user')
-        .first()
+        .firstOrFail()
 
-      return apiToken?.user as User;
+      return apiToken.user as User;
     } catch (error) {
       throw new Error('E_INVALID_API_TOKEN')
     }
