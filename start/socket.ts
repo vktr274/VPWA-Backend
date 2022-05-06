@@ -19,7 +19,11 @@ interface InviteData {
   token: string,
   fromUser: string,
   toUser: string,
-  channel: string
+  channel: {
+    name: string,
+    isPrivate: boolean,
+    owner: string
+  }
 }
 
 export enum Role {
@@ -70,7 +74,7 @@ Ws.io.on('connection', (socket) => {
 
       const channel = await Channel.findByOrFail(
         "name",
-        inviteData.channel
+        inviteData.channel.name
       )
 
       const channelUser = await ChannelUser.query()
