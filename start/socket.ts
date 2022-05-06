@@ -93,12 +93,12 @@ Ws.io.on('connection', (socket) => {
         console.log(invitation.serialize())
         socket.broadcast.emit('newInvite', inviteData)
       } else {
-        socket.broadcast.emit('inviteError', { message: 'UNAUTHORIZED', user: fromUser.username })
+        socket.emit('inviteError', { message: 'UNAUTHORIZED', user: fromUser.username })
       }
     } catch (error) {
       console.log(inviteData)
       console.log(error.message)
-      socket.broadcast.emit('inviteError', { message: error.message, user: inviteData.fromUser })
+      socket.emit('inviteError', { message: error.message.toString(), user: inviteData.fromUser })
     }
   })
 })
