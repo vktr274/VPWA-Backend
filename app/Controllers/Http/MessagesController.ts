@@ -9,15 +9,18 @@ export default class MessagesController {
     const lastId = ctx.request.input('last');
     const channelName = ctx.request.input('channelName');
 
-    return { messages: await this.getChannelMessages((await Channel.findBy("name", channelName))!.id, lastId) };
+    return {
+      channel: channelName,
+      messages: await this.getChannelMessages((await Channel.findBy("name", channelName))!.id, lastId)
+    };
   }
 
   //name substitute
-  private async getChannelMessages(channelId: number, lastId: number) {
+  private async getChannelMessages(channelId: number, lastId?: number) {
     return MessagesController.getChannelMessages(channelId, lastId)
   }
 
-  public static async getChannelMessages(channelId: number, lastId: number) {
+  public static async getChannelMessages(channelId: number, lastId?: number) {
     const limit = 20;
 
     //get mesages

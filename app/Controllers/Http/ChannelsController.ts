@@ -24,7 +24,7 @@ export default class ChannelsController {
 				channelName: ch.name,
 				isPrivate: ch.type == ChannelType.private,
 				owner: owner!.username,
-				messages: await MessagesController.getChannelMessages(ch.id, 1),
+				messages: await MessagesController.getChannelMessages(ch.id),
 			})
 		};
 
@@ -67,7 +67,7 @@ export default class ChannelsController {
 				channelName: channel.name,
 				isPrivate: channel.type == ChannelType.private,
 				owner: (await this.getChannelOwner(channel.id))!.username,
-				messages: await MessagesController.getChannelMessages(channel.id, 1),
+				messages: await MessagesController.getChannelMessages(channel.id),
 			}
 		};
 	}
