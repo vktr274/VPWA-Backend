@@ -6,23 +6,28 @@ import User from 'App/Models/User'
 export default class MessagesController {
 
   public async get(ctx: HttpContextContract) {
-    const page = ctx.request.input('page', 1);
+    const lastId = ctx.request.input('last');
     const channelName = ctx.request.input('channelName');
 
-    return { messages: await this.getChannelMessages((await Channel.findBy("name", channelName))!.id, page) };
+    return { messages: await this.getChannelMessages((await Channel.findBy("name", channelName))!.id, lastId) };
   }
 
   //name substitute
-  private async getChannelMessages(id: number, page: number) {
-    return MessagesController.getChannelMessages(id, page)
+  private async getChannelMessages(channelId: number, lastId: number) {
+    return MessagesController.getChannelMessages(channelId, lastId)
   }
 
-  public static async getChannelMessages(id: number, page: number) {
+  public static async getChannelMessages(channelId: number, lastId: number) {
     const limit = 20;
 
     //get mesages
-    const messages = await Message.query().where("channel_id", id).orderBy("id", 'desc').paginate(page, limit);
-    const json = messages.toJSON();
+    let messages = Message.query().where("channel_id", channelId)
+    if (lastId != undefined) {
+      messages = messages.where("id", "<", lastId);
+    }
+
+    const paginated = await messages.orderBy("id", "desc").paginate(1, limit);
+    const json = paginated.toJSON();
 
     //prepare output
     let response = [] as any[];
@@ -30,6 +35,7 @@ export default class MessagesController {
 
       const author = await User.find(m.user_id);
       response.push({
+        id: m.id,
         author: author!.username,
         time: m.sent_at,
         text: m.text,
