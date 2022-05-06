@@ -22,20 +22,36 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
   Route.get("", async () => {
-    return { hello: 'world' }
+    return {
+      routes: [
+        {
+          GET: [
+            "/users",
+            "/channels",
+            "/messages"],
+        }, {
+          POST: [
+            "/register",
+            "/login",
+            "/channel"],
+        }, {
+          DELETE: [
+            "/channel",],
+        }]
+    }
   })
 
   //users
-  Route.post("register", "UsersController.register")
-  Route.post("login", "UsersController.login")
+  Route.post("register", "UsersController.register");
+  Route.post("login", "UsersController.login");
 
-  Route.get("users", "UsersController.get")
+  Route.get("users", "UsersController.get").middleware('auth');
 
   //channels
-  Route.get("channels", "ChannelsController.get");
-  Route.post("channel", "ChannelsController.create");
-  Route.delete("channel", "ChannelsController.delete");
+  Route.get("channels", "ChannelsController.get").middleware('auth');
+  Route.post("channel", "ChannelsController.create").middleware('auth');
+  Route.delete("channel", "ChannelsController.delete").middleware('auth');
 
   //messages
-  Route.post("messages", "MessagesController.addMessage")
+  Route.get("messages", "MessagesController.get",).middleware('auth');
 })

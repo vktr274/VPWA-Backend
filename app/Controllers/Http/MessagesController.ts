@@ -1,25 +1,49 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Channel from 'App/Models/Channel'
+import Channel from 'App/Models/Channel';
 import Message from 'App/Models/Message'
+import User from 'App/Models/User'
 
 export default class MessagesController {
-  public async addMessage(ctx: HttpContextContract) {
-    const user = ctx.auth.use("api").user
-    if (user == null) {
-      return ctx.response.status(401).json(
-        {
-          message: "User not logged in - unauthorized"
-        }
-      )
+
+  public async get(ctx: HttpContextContract) {
+    const lastId = ctx.request.input('last');
+    const channelName = ctx.request.input('channelName');
+
+    return {
+      channel: channelName,
+      messages: await this.getChannelMessages((await Channel.findBy("name", channelName))!.id, lastId)
+    };
+  }
+
+  //name substitute
+  private async getChannelMessages(channelId: number, lastId?: number) {
+    return MessagesController.getChannelMessages(channelId, lastId)
+  }
+
+  public static async getChannelMessages(channelId: number, lastId?: number) {
+    const limit = 20;
+
+    //get mesages
+    let messages = Message.query().where("channel_id", channelId)
+    if (lastId != undefined) {
+      messages = messages.where("id", "<", lastId);
     }
-    const channel = await Channel.findByOrFail(
-      "id",
-      ctx.request.input("channel_id")
-    )
-    const message = await Message.create({
-      text: ctx.request.input("text")
-    })
-    await message.related("user").associate(user)
-    await message.related("channel").associate(channel)
+
+    const paginated = await messages.orderBy("id", "desc").paginate(1, limit);
+    const json = paginated.toJSON();
+
+    //prepare output
+    let response = [] as any[];
+    for (const m of json.data.map((m) => m.serialize())) {
+
+      const author = await User.find(m.user_id);
+      response.push({
+        id: m.id,
+        author: author!.username,
+        time: m.sent_at,
+        text: m.text,
+      })
+    };
+    return response.reverse();
   }
 }
