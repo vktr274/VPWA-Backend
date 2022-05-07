@@ -1,7 +1,9 @@
+import ChannelsController from 'App/Controllers/Http/ChannelsController'
 import MessagesController from 'App/Controllers/Http/MessagesController'
 import SocketAuth from 'App/Middleware/SocketAuth'
 import Channel, { ChannelType } from 'App/Models/Channel'
 import ChannelUser, { Role } from 'App/Models/ChannelUser'
+import KickedChannelUser from 'App/Models/KickedChannelUser'
 import Message from 'App/Models/Message'
 import User, { Status } from 'App/Models/User'
 import Ws from 'App/Services/Ws'
@@ -121,6 +123,49 @@ Ws.io.on('connection', (socket) => {
       //remove user from channel
       const channelUser = await ChannelUser.query()
         .where('user_id', removedUser.id)
+        .andWhere('channel_id', channel.id)
+        .firstOrFail();
+      channelUser.delete();
+
+      //emit change to user
+      socket.broadcast.emit('deleteChannel', { channelName: data.channelName, userName: data.userName });
+    }
+    catch (e) {
+      console.log(e.message);
+    };
+  });
+
+  socket.on("kickUser", async (data) => {
+    try {
+      user = await SocketAuth.authenticate(data.token)
+
+      const kickedUser = await User.findByOrFail(
+        'username',
+        data.userName
+      );
+      const channel = await Channel.findByOrFail(
+        "name",
+        data.channelName
+      );
+      const channelOwnerId = await ChannelsController.getChannelOwnerId(channel.id);
+
+      //add user to kick list
+      let numberOfKicks = 1;
+      if (user.id == channelOwnerId) {
+        numberOfKicks = 3;
+      }
+
+      for (let i = 0; i < numberOfKicks; i++) {
+        await KickedChannelUser.create({
+          byUserId: user.id,
+          userId: kickedUser.id,
+          channelId: channel.id
+        });
+      }
+
+      //remove user from channel
+      const channelUser = await ChannelUser.query()
+        .where('user_id', kickedUser.id)
         .andWhere('channel_id', channel.id)
         .firstOrFail();
       channelUser.delete();

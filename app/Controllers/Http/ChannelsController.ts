@@ -102,4 +102,8 @@ export default class ChannelsController {
 		const channelOwner = await ChannelUser.query().where('channel_id', id).where('role', Role.owner).first();
 		return User.find(channelOwner!.userId);
 	}
+
+	public static async getChannelOwnerId(channelId: number) {
+		return (await ChannelUser.query().where('channel_id', channelId).where('role', Role.owner).first())!.userId;
+	}
 }
