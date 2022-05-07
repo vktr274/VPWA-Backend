@@ -1,7 +1,7 @@
 import MessagesController from 'App/Controllers/Http/MessagesController'
 import SocketAuth from 'App/Middleware/SocketAuth'
-import Channel from 'App/Models/Channel'
-import ChannelUser from 'App/Models/ChannelUser'
+import Channel, { ChannelType } from 'App/Models/Channel'
+import ChannelUser, { Role } from 'App/Models/ChannelUser'
 import Message from 'App/Models/Message'
 import User, { Status } from 'App/Models/User'
 import Ws from 'App/Services/Ws'
@@ -26,16 +26,6 @@ interface InviteData {
     owner: string,
     messages: any[],
   }
-}
-
-export enum Role {
-  owner = 'owner',
-  regular = 'regular'
-}
-
-export enum ChannelType {
-  private = 'private',
-  public = 'public'
 }
 
 /**
