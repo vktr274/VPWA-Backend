@@ -3,7 +3,7 @@ import SocketAuth from 'App/Middleware/SocketAuth'
 import Channel from 'App/Models/Channel'
 import ChannelUser from 'App/Models/ChannelUser'
 import Message from 'App/Models/Message'
-import User from 'App/Models/User'
+import User, { Status } from 'App/Models/User'
 import Ws from 'App/Services/Ws'
 
 Ws.boot()
@@ -42,12 +42,21 @@ export enum ChannelType {
  * Listen for incoming socket connections
  */
 Ws.io.on('connection', (socket) => {
-  socket.emit('news', { hello: 'world' })
+
+  let user: User;
+
+  socket.on('connectUser', async (data) => {
+    user = await SocketAuth.authenticate(data.token)
+
+    //set user status
+    user.status = data.status;
+    await user.save();
+  })
 
   socket.on('addMessage', async (data) => {
     const messageData = data as MessageData
     try {
-      const user = await SocketAuth.authenticate(messageData.token)
+      user = await SocketAuth.authenticate(messageData.token)
       const channel = await Channel.findByOrFail(
         "name",
         messageData.channelName
@@ -68,7 +77,7 @@ Ws.io.on('connection', (socket) => {
   socket.on('invite', async (data) => {
     const inviteData = data as InviteData
     try {
-      const fromUser = await SocketAuth.authenticate(inviteData.token)
+      user = await SocketAuth.authenticate(inviteData.token)
       const toUser = await User.findByOrFail(
         'username',
         inviteData.toUser
@@ -80,7 +89,7 @@ Ws.io.on('connection', (socket) => {
       )
 
       const channelUser = await ChannelUser.query()
-        .select('role').where('user_id', fromUser.id)
+        .select('role').where('user_id', user.id)
         .andWhere('channel_id', channel.id)
         .firstOrFail()
 
@@ -97,12 +106,20 @@ Ws.io.on('connection', (socket) => {
         inviteData.channel.messages = await MessagesController.getChannelMessages(channel.id);
         socket.broadcast.emit('newInvite', inviteData)
       } else {
-        socket.emit('inviteError', { message: 'UNAUTHORIZED', user: fromUser.username })
+        socket.emit('inviteError', { message: 'UNAUTHORIZED', user: user.username })
       }
     } catch (error) {
       console.log(inviteData)
       console.log(error.message)
       socket.emit('inviteError', { message: error.message.toString(), user: inviteData.fromUser })
+    }
+  });
+
+  socket.on('disconnect', async () => {
+    if (user != undefined) {
+      //set status to offline
+      user.status = Status.offline;
+      await user.save();
     }
   })
 })
