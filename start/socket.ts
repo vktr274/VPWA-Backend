@@ -105,6 +105,34 @@ Ws.io.on('connection', (socket) => {
     }
   });
 
+  socket.on("revokeUser", async (data) => {
+    try {
+      user = await SocketAuth.authenticate(data.token)
+
+      const removedUser = await User.findByOrFail(
+        'username',
+        data.userName
+      );
+      const channel = await Channel.findByOrFail(
+        "name",
+        data.channelName
+      );
+
+      //remove user from channel
+      const channelUser = await ChannelUser.query()
+        .where('user_id', removedUser.id)
+        .andWhere('channel_id', channel.id)
+        .firstOrFail();
+      channelUser.delete();
+
+      //emit change to user
+      socket.broadcast.emit('deleteChannel', { channelName: data.channelName, userName: data.userName });
+    }
+    catch (e) {
+      console.log(e.message);
+    };
+  })
+
   socket.on("channelDeleted", async (data) => {
     //auth
     try {
@@ -113,7 +141,7 @@ Ws.io.on('connection', (socket) => {
     catch (e) {
       console.log(e.message);
     };
-    socket.broadcast.emit('deleteChannel', { channelName: data.channelName })
+    socket.broadcast.emit('deleteChannel', { channelName: data.channelName });
   })
 
   let disconnectUser = async () => {
