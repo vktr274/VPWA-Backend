@@ -9,9 +9,11 @@ export default class MessagesController {
     const lastId = ctx.request.input('last');
     const channelName = ctx.request.input('channelName');
 
+    const channel = await Channel.findBy("name", channelName)
+
     return {
       channel: channelName,
-      messages: await this.getChannelMessages((await Channel.findBy("name", channelName))!.id, lastId)
+      messages: channel == undefined ? [] : await this.getChannelMessages(channel.id, lastId)
     };
   }
 
