@@ -62,6 +62,7 @@ export default class UsersController {
       users: users.map((u) => ({
         username: u.username,
         email: u.email,
+        status: u.status,
       }))
     };
   }
