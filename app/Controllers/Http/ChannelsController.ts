@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Channel, { ChannelType } from 'App/Models/Channel';
 import ChannelUser, { Role } from 'App/Models/ChannelUser';
+import KickedChannelUser from 'App/Models/KickedChannelUser';
 import User from 'App/Models/User';
 import MessagesController from './MessagesController';
 
@@ -55,6 +56,13 @@ export default class ChannelsController {
 				return { errors: `Channel '${channel.name}' is private` };
 			}
 
+			//prevent banned user from entering the channel
+			const numberOfKicks = (await KickedChannelUser.query().where("user_id", user.id).where("channel_id", channel.id)).length;
+			if (numberOfKicks >= 3) {
+				return { errors: `You are banned from channel '${channel.name}'. Contact channel owner to invite you` };
+			}
+
+			//create channelUser
 			channelUser = new ChannelUser();
 			channelUser.userId = user.id;
 			channelUser.channelId = channel.id;
