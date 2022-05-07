@@ -41,8 +41,8 @@ setInterval(async () => {
         .where("channel_id", channel.id)
         .orderBy('id', 'desc')
         .first()
-      if (message != null && message.sentAt.diffNow().toMillis() >= 2592000000/*ms = 30 days*/) {
-        console.log("deleting channel")
+      if (message != null && message.sentAt.diffNow().toMillis() * -1 >= 2592000000/*ms = 30 days*/) {
+        console.log(`deleting channel with ID ${channel.id} with latest message sent at ${message.sentAt}`)
         await channel.delete()
         Ws.io.emit('deleteChannel', { channelName: channel.name })
       }
