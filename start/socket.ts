@@ -105,6 +105,17 @@ Ws.io.on('connection', (socket) => {
     }
   });
 
+  socket.on("channelDeleted", async (data) => {
+    //auth
+    try {
+      user = await SocketAuth.authenticate(data.token)
+    }
+    catch (e) {
+      console.log(e.message);
+    };
+    socket.broadcast.emit('deleteChannel', { channelName: data.channelName })
+  })
+
   let disconnectUser = async () => {
     if (user != undefined) {
       //set status to offline
