@@ -28,7 +28,4 @@ export default class ChannelUser extends BaseModel {
 
   @column()
   public role: Role
-
-  @column()
-  public kickCount: number
 }

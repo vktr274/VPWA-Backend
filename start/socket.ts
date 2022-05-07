@@ -28,6 +28,8 @@ interface InviteData {
   }
 }
 
+var timeouts = new Map()
+
 /**
  * Listen for incoming socket connections
  */
@@ -58,6 +60,26 @@ Ws.io.on('connection', (socket) => {
       } as any)
       socket.broadcast.emit('newMessage', messageData)
       console.log(message.serialize())
+
+      if (timeouts.has(channel.name)) {
+        clearTimeout(timeouts.get(channel.name))
+        console.log("timeout cleared")
+      }
+      // reset timer here
+      console.log("timeout set")
+      timeouts.set(
+        channel.name,
+        setTimeout(async () => {
+          console.log("timeout")
+          try {
+            channel.delete()
+            socket.emit('deleteChannel', { channelName: channel.name })
+            socket.broadcast.emit('deleteChannel', { channelName: channel.name })
+          } catch (error) {
+            console.log(error.mesage)
+          }
+        }, 2592000000/*ms = 30 days*/) // delete channel after 30 days of inactivity
+      )
     } catch (error) {
       console.log(messageData)
       console.log(error.message)
