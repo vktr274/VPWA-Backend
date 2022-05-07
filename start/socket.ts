@@ -115,15 +115,22 @@ Ws.io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', async () => {
+  let disconnectUser = async () => {
     if (user != undefined) {
       //set status to offline
       user.status = Status.offline;
       await user.save();
     }
-  })
-})
+  };
 
+  socket.on('end', async () => {
+    disconnectUser();
+  });
+
+  socket.on('disconnect', async () => {
+    disconnectUser();
+  });
+});
 /*
 Ws.io.use((socket, next) => {
   try {
