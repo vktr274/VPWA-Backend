@@ -6,7 +6,7 @@ export default class StatusController {
     try {
       const user = await User.findByOrFail(
         "username",
-        ctx.request.input("username")
+        ctx.auth.user!.username
       )
       user.status = ctx.request.input("status")
       await user.save()
@@ -20,7 +20,7 @@ export default class StatusController {
     try {
       const user = await User.findByOrFail(
         "username",
-        ctx.request.qs().username
+        ctx.auth.user!.username
       )
       return { status: user.status }
     } catch (error) {

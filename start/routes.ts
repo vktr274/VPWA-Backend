@@ -28,12 +28,14 @@ Route.group(() => {
           GET: [
             "/users",
             "/channels",
-            "/messages"],
+            "/messages",
+            "/status"],
         }, {
           POST: [
             "/register",
             "/login",
-            "/channel"],
+            "/channel",
+            "/status"],
         }, {
           DELETE: [
             "/channel",],
