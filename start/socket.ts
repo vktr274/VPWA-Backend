@@ -70,21 +70,41 @@ Ws.io.on('connection', (socket) => {
     const inviteData = data as InviteData
     try {
       user = await SocketAuth.authenticate(inviteData.token)
+
+      //fetch data
       const toUser = await User.findByOrFail(
         'username',
         inviteData.toUser
       )
-
       const channel = await Channel.findByOrFail(
         "name",
         inviteData.channel.name
       )
-
       const channelUser = await ChannelUser.query()
         .select('role').where('user_id', user.id)
         .andWhere('channel_id', channel.id)
         .firstOrFail()
+      const channelOwnerId = await ChannelsController.getChannelOwnerId(channel.id);
 
+      //test if toUser is banned from channel
+      const kicked = await KickedChannelUser.query().where("user_id", toUser.id).where("channel_id", channel.id)
+      const numberOfKicks = kicked.length;
+
+      if (numberOfKicks >= 3) {
+        if (user.id == channelOwnerId) {
+          //channel owners invite deletes all kicks
+          for (var i = 0; i < numberOfKicks; i++) kicked[i].delete();
+        }
+        else {
+          socket.emit('inviteError', {
+            message: `User '${inviteData.toUser}' is banned from this server. Contact channel owner to invite the user for you`,
+            user: user.username
+          });
+          return;
+        }
+      }
+
+      //send invite
       if (
         (channel.type == ChannelType.private && channelUser.role == Role.owner) ||
         (channel.type == ChannelType.public)
