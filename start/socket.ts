@@ -30,6 +30,7 @@ interface InviteData {
   }
 }
 
+// Check 30 day inactivity of channels every hour
 setInterval(async () => {
   try {
     console.log("checking channel inactivity")
@@ -82,7 +83,6 @@ Ws.io.on('connection', (socket) => {
       socket.broadcast.emit('newMessage', messageData)
       console.log(message.serialize())
     } catch (error) {
-      console.log(messageData)
       console.log(error.message)
     }
   })
@@ -142,7 +142,6 @@ Ws.io.on('connection', (socket) => {
         socket.emit('inviteError', { message: 'UNAUTHORIZED', user: user.username })
       }
     } catch (error) {
-      console.log(inviteData)
       console.log(error.message)
       socket.emit('inviteError', { message: error.message.toString(), user: inviteData.fromUser })
     }
@@ -246,13 +245,3 @@ Ws.io.on('connection', (socket) => {
     disconnectUser();
   });
 });
-/*
-Ws.io.use((socket, next) => {
-  try {
-    SocketAuth.authenticate(socket)
-    next()
-  } catch (error) {
-    next(new Error("AUTH_ERROR"))
-  }
-})
-*/

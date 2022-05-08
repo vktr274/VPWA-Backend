@@ -46,9 +46,6 @@ class SocketAuth {
       throw new Error('CANNOT_PARSE_TOKEN');
     }
 
-    // TODO: delete later
-    console.log(parsedToken)
-
     try {
       const apiToken = await ApiToken.query()
         .select('user_id')
