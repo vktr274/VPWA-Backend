@@ -45,3 +45,27 @@ Data model below was created before implementation, and later implemented with m
 ![DB](vpwa_db_datagrip.png)
 
 </details>
+
+## Run
+
+Before running the backend create a `.env` file in the root of the project.
+
+Example of `.env`:
+
+```env
+PORT=APP_PORT
+HOST=APP_HOST
+NODE_ENV=ENV_TYPE //like development or production
+APP_KEY=SECRET_APP_KEY
+DRIVE_DISK=local
+DB_CONNECTION=pg
+PG_HOST=POSTGRES_HOST
+PG_PORT=POSTGRES_PORT
+PG_USER=POSTGRES_USER
+PG_PASSWORD=POSTGRES_USER_PASSWORD
+PG_DB_NAME=POSTGRES_DATABASE_NAME
+PG_SCHEMA=POSTGRES_SCHEMA_NAME
+
+```
+
+Run with `node ace serve` or `node ace serve --watch` for development.
