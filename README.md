@@ -30,11 +30,18 @@ Socket connection is established with frontend application using socket.io libra
 
 ## Data model
 
-Data model bellow was created before implementation, and later implemented with migrations.
+Data model below was created before implementation, and later implemented with migrations.
 
 <details>
-<summary><b>Show database schema</b></summary>
+<summary><b>Show database schema design</b></summary>
 
 ![DB](db_vpwa.svg)
+
+</details>
+
+<details>
+<summary><b>Show production database schema</b></summary>
+
+![DB](vpwa_db_datagrip.png)
 
 </details>
