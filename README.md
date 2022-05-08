@@ -68,4 +68,4 @@ PG_SCHEMA=POSTGRES_SCHEMA_NAME
 
 ```
 
-Run with `node ace serve` or `node ace serve --watch` for development.
+Run with `node ace serve` or `node ace serve --watch`.
