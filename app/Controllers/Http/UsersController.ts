@@ -5,26 +5,32 @@ import User from 'App/Models/User'
 
 export default class UsersController {
   public async register(ctx: HttpContextContract) {
-    const user = await User.create({
-      username: ctx.request.input("username"),
-      name: ctx.request.input("name"),
-      surname: ctx.request.input("surname"),
-      email: ctx.request.input("email"),
-      password: ctx.request.input("password")
-    })
-    const token = await ctx.auth.use("api").login(
-      user,
-      {
-        expiresIn: "10 days"
+    try {
+      const user = await User.create({
+        username: ctx.request.input("username"),
+        name: ctx.request.input("name"),
+        surname: ctx.request.input("surname"),
+        email: ctx.request.input("email"),
+        password: ctx.request.input("password")
+      })
+      const token = await ctx.auth.use("api").login(
+        user,
+        {
+          expiresIn: "10 days"
+        }
+      )
+      //return data
+      return {
+        token: token.toJSON(),
+        user: {
+          username: user?.username,
+          name: user?.name,
+          surname: user?.surname,
+          email: user?.email,
+        }
       }
-    )
-    //return data
-    return {
-      token: token.toJSON(),
-      user: {
-        username: user?.username,
-        email: user?.email,
-      }
+    } catch (error) {
+      return { error: error.message }
     }
   }
 
@@ -41,6 +47,8 @@ export default class UsersController {
       token: token.toJSON(),
       user: {
         username: ctx.auth.user?.username,
+        name: ctx.auth.user?.name,
+        surname: ctx.auth.user?.surname,
         email: ctx.auth.user?.email,
       }
     }
