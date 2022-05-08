@@ -68,4 +68,5 @@ PG_SCHEMA=POSTGRES_SCHEMA_NAME
 
 ```
 
-Run with `node ace serve` or `node ace serve --watch`.
+Run with `node ace serve` or `node ace serve --watch`.\
+Build according to official AdonisJS docs.
